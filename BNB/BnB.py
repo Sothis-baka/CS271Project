@@ -18,7 +18,7 @@ def initateData(inputData):
                 pathValue[x,y] = currentList[y]
     return pathValue, n
 
-def firstMin(pathValue):
+def firstMin(pathValue, n):
     #print("Original matrix: \n{}".format(pathValue))
     subtract1 = [min(pathValue[i,:]) for i in range(n)]
     #print(subtract1)
@@ -31,7 +31,7 @@ def firstMin(pathValue):
     #print("Subtract1: {}, Subtract2: {}, cost: {}".format(subtract1, subtract2, sum(subtract1 + subtract2)))
     return pathValue2, sum(subtract1 + subtract2)
 
-def secondPlusMin(pathValue, inNode, outNode, g):
+def secondPlusMin(pathValue, inNode, outNode, g, n):
     #print("Tracking matrix update from {} -> {}".format(inNode, outNode))
     pathValue1 = np.copy(pathValue)
     #print("Input matrix: \n{}".format(pathValue1))
@@ -56,8 +56,8 @@ def secondPlusMin(pathValue, inNode, outNode, g):
     return pathValue2, sum(subtract1 + subtract2) + g + pathValue[inNode][outNode]
 
 
-def BnB(pathMatrix, startNode):
-    pathMatrixNew, cost = firstMin(np.copy(pathValue))
+def BnB(pathMatrix, startNode, n):
+    pathMatrixNew, cost = firstMin(np.copy(pathValue), n)
     visited = set()
     def dfs(pathMatrix, currentNode, cost, upperBound, path):
         visited.add(currentNode)
@@ -67,7 +67,7 @@ def BnB(pathMatrix, startNode):
         for i in range(n):
             if i not in visited:
                 #print("Original matrix prior to function: {}".format(pathMatrix))
-                pathMatrixNew, costNew = secondPlusMin(np.copy(pathMatrix), currentNode, i, cost)
+                pathMatrixNew, costNew = secondPlusMin(np.copy(pathMatrix), currentNode, i, cost, n)
                 myMatrices.append((pathMatrixNew, costNew, i))
         sortedList = sorted(myMatrices, key = lambda x: x[1])
         #print(sortedList)
@@ -100,7 +100,7 @@ def main():
             return
         # get the start time
         st = time.time()
-        BnB(dataSource,int(val))
+        BnB(dataSource,int(val), n)
         # get the end time
         et = time.time()
         print("Current run took {} seconds".format(et-st))
