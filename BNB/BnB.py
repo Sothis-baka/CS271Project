@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import math
+import time
+
 def initateData(inputData):
     f = open(inputData, "r")
     n = int(f.readline())
@@ -96,6 +98,11 @@ def main():
         val = input("Enter your starting city (Cities available are from 0-{}), Enter q to quit: ".format(n-1))
         if val == "q":
             return
+        # get the start time
+        st = time.time()
         BnB(dataSource,int(val))
+        # get the end time
+        et = time.time()
+        print("Current run took {} seconds".format(et-st))
 if __name__ == '__main__':
     main()
