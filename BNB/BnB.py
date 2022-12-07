@@ -17,7 +17,7 @@ def initateData(inputData):
     return pathValue
 
 def firstMin(pathValue):
-    print("Original matrix: \n{}".format(pathValue))
+    #print("Original matrix: \n{}".format(pathValue))
     subtract1 = [min(pathValue[i,:]) for i in range(n)]
     #print(subtract1)
     pathValue1 = np.array(pathValue) - np.array(subtract1).reshape(-1,1)
@@ -26,13 +26,13 @@ def firstMin(pathValue):
     #print(subtract2)
     pathValue2 = np.array(pathValue1) - np.array(subtract2).reshape(-1,1).T
     #print("Original matrix after original clean: \n{}".format(pathValue2))
-    print("Subtract1: {}, Subtract2: {}, cost: {}".format(subtract1, subtract2, sum(subtract1 + subtract2)))
+    #print("Subtract1: {}, Subtract2: {}, cost: {}".format(subtract1, subtract2, sum(subtract1 + subtract2)))
     return pathValue2, sum(subtract1 + subtract2)
 
 def secondPlusMin(pathValue, inNode, outNode, g):
-    print("Tracking matrix update from {} -> {}".format(inNode, outNode))
+    #print("Tracking matrix update from {} -> {}".format(inNode, outNode))
     pathValue1 = np.copy(pathValue)
-    print("Input matrix: \n{}".format(pathValue1))
+    #print("Input matrix: \n{}".format(pathValue1))
     pathValue1[inNode,:] = np.inf
     #print("Input matrix Update Rows: {}".format(pathValue1))
     pathValue1[:,outNode] = np.inf
@@ -50,7 +50,7 @@ def secondPlusMin(pathValue, inNode, outNode, g):
     pathValue2 = np.array(pathValue2) - subtract2.reshape(-1,1)
     #print("Matrix after col update: \n{}".format(pathValue2))
 
-    print("Subtract1: {}, Subtract2: {}, cost: {}".format(subtract1, subtract2, sum(subtract1 + subtract2)+ g +pathValue[inNode][outNode]))
+    #print("Subtract1: {}, Subtract2: {}, cost: {}".format(subtract1, subtract2, sum(subtract1 + subtract2)+ g +pathValue[inNode][outNode]))
     return pathValue2, sum(subtract1 + subtract2) + g + pathValue[inNode][outNode]
 
 
@@ -82,7 +82,8 @@ def BnB(pathMatrix, startNode):
                     else:
                         path = " -> {}".format(currentNode) + path
             else:
-                print("{} -> {} was pruned with an estimated cost of {}".format(currentNode, node, cost))
+                pass
+                #print("{} -> {} was pruned with an estimated cost of {}".format(currentNode, node, cost))
 
         return upperBound, path
     cost, path = dfs(np.copy(pathMatrixNew), startNode, cost, np.inf, "")
