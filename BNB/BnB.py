@@ -16,7 +16,7 @@ def initateData(inputData):
         for y in range(n):
             if x != y:
                 pathValue[x,y] = currentList[y]
-    return pathValue
+    return pathValue, n
 
 def firstMin(pathValue):
     #print("Original matrix: \n{}".format(pathValue))
@@ -93,7 +93,7 @@ def BnB(pathMatrix, startNode):
 
 def main():
     source = input("Enter your source location (5_0.0_10.0.out): ")
-    dataSource = initateData(source)
+    dataSource, n = initateData(source)
     while True:
         val = input("Enter your starting city (Cities available are from 0-{}), Enter q to quit: ".format(n-1))
         if val == "q":
