@@ -6,6 +6,12 @@ import time
 global nne
 nne = 0
 
+global growthRate
+growthRate = 0
+
+global level
+level = 0
+
 
 def initateData(inputData):
     f = open(inputData, "r")
@@ -63,9 +69,18 @@ def secondPlusMin(pathValue, inNode, outNode, g, n):
 def BnB(pathMatrix, startNode, n):
     pathMatrixNew, startCost = firstMin(np.copy(pathMatrix), n)
     visited = set()
+    global nne
+    nne = 1
+    global level
+    level = 0
+    levelValue = [np.inf for i in range(n)]
     def dfs(pathMatrix, currentNode, cost, upperBound, path):
+        global level
+        global nne
+        level += 1
         visited.add(currentNode)
         if len(visited) == n:
+            level -= 1
             return cost, " -> {}".format(currentNode)
         myMatrices = []
         for i in range(n):
@@ -75,45 +90,78 @@ def BnB(pathMatrix, startNode, n):
                 myMatrices.append((pathMatrixNew, costNew, i))
         sortedList = sorted(myMatrices, key = lambda x: x[1])
         #print(sortedList)
-        sortedList = sortedList[:math.floor(math.sqrt(len(sortedList)))]
-        for pathMatrixNew, cost, node in sortedList:
-            #print("upperBound: {}, f: {}".format(upperBound, cost))
-            if cost < upperBound:
-                #print("{} -> {}".format(currentNode, node))
-                global nne
-                nne +=1
-                result, path = dfs(np.copy(pathMatrixNew), node, cost, upperBound, path)
-                visited.remove(node)
-                #print("{} <- {}".format(currentNode, node))
-                if result < upperBound:
-                    upperBound = result
-                    if len(visited) == 1:
-                        path = "{}".format(currentNode) + path
-                    else:
-                        path = " -> {}".format(currentNode) + path
-            else:
-                break
-                #print("{} -> {} was pruned with an estimated cost of {}".format(currentNode, node, cost))
+        localMin = sortedList[0][1]
+        #print("Local min: {}, past level min: {}".format(localMin,levelValue[level-1]))
+        if localMin <= (levelValue[min([level+1,n-1])] + levelValue[min([level+2,n-1])])/2:
+            levelValue[level] = min([localMin, levelValue[level]])
+            sortedList = sortedList[:math.floor(math.sqrt(len(sortedList)))]
+            for pathMatrixNew, cost, node in sortedList:
+                #print("upperBound: {}, f: {}".format(upperBound, cost))
+                if cost < upperBound:
+                    #print("{} -> {}".format(currentNode, node))
+                    nne +=1
 
+                    result, path = dfs(np.copy(pathMatrixNew), node, cost, upperBound, path)
+                    visited.remove(node)
+                    #print("{} <- {}".format(currentNode, node))
+                    if result < upperBound:
+                        upperBound = result
+                        if len(visited) == 1:
+                            path = "{}".format(currentNode) + path
+                        else:
+                            path = " -> {}".format(currentNode) + path
+                else:
+                    break
+                    #print("{} -> {} was pruned with an estimated cost of {}".format(currentNode, node, cost))
+        level -= 1
         return upperBound, path
-    global nne
-    nne =1
     cost, path = dfs(np.copy(pathMatrixNew), startNode, startCost, np.inf, "")
-    print("Final cost is {} and the path was {}".format(cost, path+" -> {}".format(startNode)))
+    return cost, nne, path
 
 def main():
-    source = input("Enter your source location (5_0.0_10.0.out): ")
+    source = input("Enter your source location: ")
     dataSource, n = initateData(source)
-    while True:
-        val = input("Enter your starting city (Cities available are from 0-{}), Enter q to quit: ".format(n-1))
-        if val == "q":
-            return
-        # get the start time
-        st = time.time()
-        BnB(dataSource,int(val), n)
-        # get the end time
-        et = time.time()
-        print("Current run took {} seconds".format(et-st))
-        print("Expanded {} nodes".format(nne))
+    costs = []
+    nodesExp = []
+    timeSpend = []
+    
+    version = input("Automate problem estimates? y/n: ")
+    
+    if version == "y":
+        for i in range(min([n, 10])):
+            # get the start time
+            st = time.time()
+            cost, nodes, path = BnB(dataSource,i, n)
+            costs.append(cost)
+            nodesExp.append(nodes)
+            # get the end time
+            et = time.time()
+            timeSpend.append(et-st)
+
+        print("Statistics: ")
+        print()
+        print("Mean Cost: {}".format(np.mean(costs)))
+        print("Min Cost: {}".format(np.min(costs)))
+        print("STD Cost: {}".format(np.std(costs)))
+        print()
+        print("Mean Nodes Expanded: {}".format(np.mean(nodesExp)))
+        print("STD Nodes Expanded: {}".format(np.std(nodesExp)))
+        print()
+        print("Mean Time Spend: {}".format(np.mean(timeSpend)))
+        print("STD Time Spend: {}".format(np.std(timeSpend)))
+    else:
+        while True:
+            val = input("Enter your starting city (Cities available are from 0-{}), Enter q to quit: ".format(n-1))
+            if val == "q":
+                return
+            # get the start time
+            st = time.time()
+            cost, nodes, path = BnB(dataSource,int(val), n)
+            # get the end time
+            et = time.time()
+            print("Current run took {} seconds".format(et-st))
+            print("Expanded {} nodes".format(nne))
+            
+            print("Final cost is {} and the path was {}".format(cost, path + " -> {}".format(int(val))))
 if __name__ == '__main__':
     main()
