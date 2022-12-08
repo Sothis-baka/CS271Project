@@ -3,6 +3,10 @@ import numpy as np
 import math
 import time
 
+global nne
+nne = 0
+
+
 def initateData(inputData):
     f = open(inputData, "r")
     n = int(f.readline())
@@ -57,7 +61,7 @@ def secondPlusMin(pathValue, inNode, outNode, g, n):
 
 
 def BnB(pathMatrix, startNode, n):
-    pathMatrixNew, cost = firstMin(np.copy(pathValue), n)
+    pathMatrixNew, startCost = firstMin(np.copy(pathMatrix), n)
     visited = set()
     def dfs(pathMatrix, currentNode, cost, upperBound, path):
         visited.add(currentNode)
@@ -71,12 +75,16 @@ def BnB(pathMatrix, startNode, n):
                 myMatrices.append((pathMatrixNew, costNew, i))
         sortedList = sorted(myMatrices, key = lambda x: x[1])
         #print(sortedList)
+        sortedList = sortedList[:math.floor(math.sqrt(len(sortedList)))]
         for pathMatrixNew, cost, node in sortedList:
+            #print("upperBound: {}, f: {}".format(upperBound, cost))
             if cost < upperBound:
-                print("{} -> {}".format(currentNode, node))
+                #print("{} -> {}".format(currentNode, node))
+                global nne
+                nne +=1
                 result, path = dfs(np.copy(pathMatrixNew), node, cost, upperBound, path)
                 visited.remove(node)
-                print("{} <- {}".format(currentNode, node))
+                #print("{} <- {}".format(currentNode, node))
                 if result < upperBound:
                     upperBound = result
                     if len(visited) == 1:
@@ -84,11 +92,13 @@ def BnB(pathMatrix, startNode, n):
                     else:
                         path = " -> {}".format(currentNode) + path
             else:
-                pass
+                break
                 #print("{} -> {} was pruned with an estimated cost of {}".format(currentNode, node, cost))
 
         return upperBound, path
-    cost, path = dfs(np.copy(pathMatrixNew), startNode, cost, np.inf, "")
+    global nne
+    nne =1
+    cost, path = dfs(np.copy(pathMatrixNew), startNode, startCost, np.inf, "")
     print("Final cost is {} and the path was {}".format(cost, path+" -> {}".format(startNode)))
 
 def main():
@@ -104,5 +114,6 @@ def main():
         # get the end time
         et = time.time()
         print("Current run took {} seconds".format(et-st))
+        print("Expanded {} nodes".format(nne))
 if __name__ == '__main__':
     main()
